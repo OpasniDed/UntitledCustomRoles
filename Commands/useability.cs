@@ -1,11 +1,8 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
-using Exiled.CreditTags.Features;
+using RemoteAdmin;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UntitledCustomRoles.API;
 using UntitledCustomRoles.API.Interfaces;
@@ -17,7 +14,7 @@ namespace UntitledCustomRoles.Commands
     {
         public string Command { get; } = "abilityuse";
         public string[] Aliases { get; } = { "uability", "uab", "uaseab", "ub" };
-        public string Description { get; } = "Команда для использования абилити (UCR)";
+        public string Description { get; } = "Command for ability use (UCR)";
         public bool SanitizeResponse => false;
 
         internal static readonly Dictionary<Player, DateTime> cooldowns = new();
@@ -25,9 +22,9 @@ namespace UntitledCustomRoles.Commands
 
         public bool Execute(ArraySegment<string> args, ICommandSender sender, out string response)
         {
-            if (sender is ServerConsole)
+            if (sender is not PlayerCommandSender)
             {
-                response = "Команду можно использовать только в игре";
+                response = "You can use it only in game.";
                 return false;
             }
 
@@ -35,20 +32,20 @@ namespace UntitledCustomRoles.Commands
 
             if (player == null)
             {
-                response = "Игрока не существует";
+                response = "Player does not exist.";
                 return false;
             }
 
             if (!CustomRole.TryGetPlayerRole(player, out ICustomRole role))
             {
-                response = "Вы должны играть за кастомную роль";
+                response = "You need play as Custom Role.";
                 return false;
             }
 
             ICustomRoleAbility ability = role.Ability;
             if (ability == null)
             {
-                response = "У вашей роли нет способностей";
+                response = "Your custom role dont have ability.";
                 return false;
             }
 
@@ -57,7 +54,7 @@ namespace UntitledCustomRoles.Commands
                 var timeSince = DateTime.UtcNow - last;
                 if (timeSince.TotalSeconds < ability.Cooldown)
                 {
-                    response = $"Способность на кулдауне. Осталось: {(int)ability.Cooldown - (int)timeSince.TotalSeconds} секунд";
+                    response = $"Ability cooldown. Remaining: {(int)ability.Cooldown - (int)timeSince.TotalSeconds} seconds.";
                     return false;
                 }
             }
@@ -67,15 +64,10 @@ namespace UntitledCustomRoles.Commands
 
             if (remainingUses[player] <= 0)
             {
-                response = "Вы достигли лимита способности";
+                response = "Ability limit.";
                 return false;
             }
 
-            if (ability.MaxUsesPerRound <= 0)
-            {
-                response = "Способность больше нельзя использовать, лимит";
-                return false;
-            }
             Player? target = null;
 
             if (ability.RequiredTarget)
@@ -85,13 +77,13 @@ namespace UntitledCustomRoles.Commands
 
                 if (!Physics.Raycast(ray, out RaycastHit hit, Plugin.Instance.Config.raycastRange, layerMask))
                 {
-                    response = "Таргета не найдено";
+                    response = "Target does not exist.";
                     return false;
                 }
 
                 if (target == player)
                 {
-                    response = "Вы не можете использовать абилити на самом себе";
+                    response = "You cant use it to yourself.";
                     return false;
                 }
 
@@ -99,7 +91,7 @@ namespace UntitledCustomRoles.Commands
 
                 if (target == null)
                 {
-                    response = "Таргета не найденео";
+                    response = "Target does not exist.";
                     return false;
                 }
 
@@ -109,11 +101,11 @@ namespace UntitledCustomRoles.Commands
                 }
                 catch (Exception ex)
                 {
-                    response = $"Ошибка использования абилити: {ex}";
+                    response = $"Error ability using: {ex}";
                     return false;
                 }
 
-                response = $"Способность с игроком {target.Nickname} применена";
+                response = $"Ability with {target.Nickname} was used.";
                 return true;
             }
 
@@ -123,14 +115,14 @@ namespace UntitledCustomRoles.Commands
             }
             catch (Exception ex)
             {
-                response = $"Ошибка использования способности: {ex}";
+                response = $"Error ability using: {ex}";
                 return false;
             }
 
             cooldowns[player] = DateTime.UtcNow;
             remainingUses[player]--;
 
-            response = $"Способность {ability.Name} использована";
+            response = $"Ability {ability.Name} was used";
             return true;
         }
     }

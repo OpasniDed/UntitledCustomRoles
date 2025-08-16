@@ -9,9 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using UntitledCustomRoles.API.Interfaces;
+using UntitledCustomRoles.Events;
 
 namespace UntitledCustomRoles.API
 {
@@ -19,7 +18,7 @@ namespace UntitledCustomRoles.API
     {
 
         private static readonly Dictionary<int, ICustomRole> CustomRoles = new();
-        private static readonly Dictionary<Player, ICustomRole> PlayerRoles = new();
+        internal static readonly Dictionary<Player, ICustomRole> PlayerRoles = new();
         public static IReadOnlyList<ICustomRole> RolesList => CustomRoles.Values.ToList();
 
 
@@ -82,7 +81,7 @@ namespace UntitledCustomRoles.API
                 }
                 catch (Exception ex)
                 {
-                    Log.Error($"Не удалось создать экземпляр роли {type.FullName}: {ex}");
+                    Log.Error($"Error create example {type.FullName}: {ex}");
                 }
             }
         }
@@ -92,13 +91,13 @@ namespace UntitledCustomRoles.API
         {
             if (role == null)
             {
-                Log.Error("Попытка зарегистрировать null роль");
+                Log.Error("Trying register null role.");
                 return false;
             }
 
             if (CustomRoles.ContainsKey(role.UId))
             {
-                Log.Error($"Роль с ID {role.UId} уже зарегистрирована");
+                Log.Error($"Role with ID {role.UId} already exist.");
                 return false;
             }
 
@@ -154,6 +153,7 @@ namespace UntitledCustomRoles.API
                 player.Position = Room.Get(role.SpawnRoom).Position;
 
             player.Broadcast(role.BroadcastDuration, role.BroadcastText);
+            CustomRoleEvents.OnCustomRoleSpawned(new Events.Args.CustomRoleSpawnedEventArgs(player, role));
         }
     }
 }

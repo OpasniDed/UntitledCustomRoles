@@ -3,16 +3,13 @@ using Exiled.Events.EventArgs.Player;
 using Exiled.Events.EventArgs.Scp096;
 using Exiled.Events.EventArgs.Scp173;
 using MEC;
-using PlayerRoles;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UntitledCustomRoles.API;
 using UntitledCustomRoles.API.Interfaces;
-using UnityEngine;
 using UntitledCustomRoles.Commands;
 
-namespace UntitledCustomRoles.Events
+namespace UntitledCustomRoles
 {
     public class Handlers
     {

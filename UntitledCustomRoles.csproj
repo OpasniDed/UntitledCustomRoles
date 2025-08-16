@@ -112,11 +112,9 @@
     <Compile Include="Commands\ucr.cs" />
     <Compile Include="Commands\useability.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="Events\Handlers.cs" />
-    <Compile Include="Example\Abilities\SecondAbility.cs" />
-    <Compile Include="Example\Abilities\FirstAbility.cs" />
-    <Compile Include="Example\Roles\SecondRole.cs" />
-    <Compile Include="Example\Roles\FirstRole.cs" />
+    <Compile Include="Events\Args\CustomRoleSpawnedEventArgs.cs" />
+    <Compile Include="CustomRoleEvents.cs" />
+    <Compile Include="Handlers.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
