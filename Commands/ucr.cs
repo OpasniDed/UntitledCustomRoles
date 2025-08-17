@@ -1,6 +1,7 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
 using Exiled.CustomItems.API.Features;
+using Exiled.Permissions.Extensions;
 using PlayerRoles;
 using System;
 using System.Linq;
@@ -20,6 +21,13 @@ namespace UntitledCustomRoles.Commands
 
         public bool Execute(ArraySegment<string> args, ICommandSender sender, out string response)
         {
+
+            if (!sender.CheckPermission("ucr"))
+            {
+                response = "You dont have permission to run this command. Premission: ucr";
+                return false;
+            }
+
             if (args.Count == 0)
             {
                 response = @"Use
