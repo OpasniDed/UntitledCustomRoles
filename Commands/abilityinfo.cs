@@ -11,7 +11,7 @@ using UntitledCustomRoles.API.Interfaces;
 
 namespace UntitledCustomRoles.Commands
 {
-    [CommandHandler(typeof(RemoteAdminCommandHandler))]
+    [CommandHandler(typeof(ClientCommandHandler))]
     public class abilityinfo : ICommand
     {
         public string Command { get; } = "abilityinfo";
