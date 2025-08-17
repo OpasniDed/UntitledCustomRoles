@@ -109,6 +109,7 @@
     <Compile Include="API\Enums\AbilityType.cs" />
     <Compile Include="API\Interfaces\ICustomRole.cs" />
     <Compile Include="API\Interfaces\ICustomRoleAbility.cs" />
+    <Compile Include="Commands\abilityinfo.cs" />
     <Compile Include="Commands\ucr.cs" />
     <Compile Include="Commands\useability.cs" />
     <Compile Include="Config.cs" />
