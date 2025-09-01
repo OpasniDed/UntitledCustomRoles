@@ -14,5 +14,7 @@ namespace UntitledCustomRoles.API.Interfaces
 
 
         void Ability(Player player, Player? target = null);
+
+
     }
 }

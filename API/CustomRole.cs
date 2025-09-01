@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using UnityEngine;
 using UntitledCustomRoles.API.Interfaces;
 using UntitledCustomRoles.Events;
 
@@ -19,7 +20,9 @@ namespace UntitledCustomRoles.API
 
         private static readonly Dictionary<int, ICustomRole> CustomRoles = new();
         internal static readonly Dictionary<Player, ICustomRole> PlayerRoles = new();
+        internal static readonly List<Player> spawning = new();
         public static IReadOnlyList<ICustomRole> RolesList => CustomRoles.Values.ToList();
+
 
 
         public static bool TryGet(int id, out ICustomRole role) => CustomRoles.TryGetValue(id, out role);
@@ -115,8 +118,11 @@ namespace UntitledCustomRoles.API
 
         internal static void ApplyRole(Player player, ICustomRole role)
         {
+            if (spawning.Contains(player)) return;
+            spawning.Add(player);
             player.CustomInfo = role.CustomInfo;
             player.Health = role.Health;
+            player.MaxHealth = role.Health;
             player.ClearInventory();
             player.ClearAmmo();
             player.Scale = role.Size;
@@ -150,10 +156,62 @@ namespace UntitledCustomRoles.API
             }
 
             if (role.SpawnRoom != RoomType.Unknown)
-                player.Position = Room.Get(role.SpawnRoom).Position;
+                player.Position = GetValidPosition(Room.Get(role.SpawnRoom));
 
             player.Broadcast(role.BroadcastDuration, role.BroadcastText);
             CustomRoleEvents.OnCustomRoleSpawned(new Events.Args.CustomRoleSpawnedEventArgs(player, role));
+            Timing.CallDelayed(0.1f, () =>
+            {
+                if (spawning.Contains(player))
+                    spawning.Remove(player);
+            });
+        }
+
+
+        private static Vector3 GetValidPosition(Room room)
+        {
+            Vector3 offset = Vector3.zero;
+            switch (room.Type)
+            {
+                case RoomType.HczStraightPipeRoom:
+                    offset = new Vector3(2.96f, 1f, -6.19f);
+                    break;
+                case RoomType.Hcz127:
+                    offset = new Vector3(2.37f, 1f, 0.82f);
+                    break;
+                case RoomType.LczCheckpointA:
+                case RoomType.LczCheckpointB:
+                case RoomType.HczTesla:
+                    offset = new Vector3(5.34f, 1f, 0.12f);
+                    break;
+                case RoomType.HczTestRoom:
+                    offset = new Vector3(6.53f, 1f, 5.48f);
+                    break;
+                case RoomType.HczCrossRoomWater:
+                    offset = new Vector3(-5f, 1f, 0f);
+                    break;
+                case RoomType.HczNuke:
+                    offset = new Vector3(-3.14f, 1f, -0.12f);
+                    break;
+                case RoomType.HczArmory:
+                    offset = new Vector3(-2.58f, 1f, 0f);
+                    break;
+                case RoomType.Hcz939:
+                    offset = new Vector3(2.04f, 1f, -0.45f);
+                    break;
+                case RoomType.Lcz330:
+                    offset = new Vector3(-4.50f, 1f, 0f);
+                    break;
+                case RoomType.Lcz173:
+                    offset = new Vector3(-4.28f, 1f, 0f);
+                    break;
+                case RoomType.EzCollapsedTunnel:
+                case RoomType.EzShelter:
+                    offset = new Vector3(0f, 1f, 4.26f);
+                    break;
+
+            }
+            return room.WorldPosition(offset) + Vector3.up;
         }
     }
 }

@@ -122,6 +122,7 @@ namespace UntitledCustomRoles
             CustomRole.TryClearPlayerRoles();
             useability.cooldowns.Clear();
             useability.remainingUses.Clear();
+            CustomRole.spawning.Clear();
         }
         private void RoundStarted()
         {
