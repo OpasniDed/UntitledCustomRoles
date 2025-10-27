@@ -3,6 +3,7 @@ using Exiled.Events.EventArgs.Player;
 using Exiled.Events.EventArgs.Scp096;
 using Exiled.Events.EventArgs.Scp173;
 using MEC;
+using PlayerRoles;
 using System;
 using System.Linq;
 using UntitledCustomRoles.API;
@@ -19,7 +20,7 @@ namespace UntitledCustomRoles
         internal void Register()
         {
             Exiled.Events.Handlers.Player.Escaping += Escaping;
-            Exiled.Events.Handlers.Player.ChangingRole += ChangingRole;
+            Exiled.Events.Handlers.Player.Spawned += Spawned;
             Exiled.Events.Handlers.Player.Died += Died;
             Exiled.Events.Handlers.Player.Left += Left;
             Exiled.Events.Handlers.Player.Destroying += Destroy;
@@ -35,7 +36,7 @@ namespace UntitledCustomRoles
         internal void Unregister()
         {
             Exiled.Events.Handlers.Player.Escaping -= Escaping;
-            Exiled.Events.Handlers.Player.ChangingRole -= ChangingRole;
+            Exiled.Events.Handlers.Player.Spawned -= Spawned;
             Exiled.Events.Handlers.Player.Died -= Died;
             Exiled.Events.Handlers.Player.Left -= Left;
             Exiled.Events.Handlers.Player.Destroying -= Destroy;
@@ -73,7 +74,7 @@ namespace UntitledCustomRoles
             }
         }
 
-        private void ChangingRole(ChangingRoleEventArgs ev)
+        private void Spawned(SpawnedEventArgs ev)
         {
             if (isApplyingRole) return;
 
@@ -136,34 +137,22 @@ namespace UntitledCustomRoles
         private void ApplyRandomRole(Player player)
         {
             var roleList = CustomRole.RolesList
-                .Where(r => r.RoleType == player.Role.Type && !r.IgnoreGameSpawn)
+                .Where(r =>
+                    !r.IgnoreGameSpawn &&
+                    (
+                        (!r.IgnoreRole && r.RoleType == player.Role.Type) ||
+                        (r.IgnoreRole && player.Role.Type is not RoleTypeId.Spectator and not RoleTypeId.Overwatch)
+                    )
+                )
                 .ToList();
 
-            if (!roleList.Any()) return;
-
-            if (roleList.Count == 1)
-            {
-                var singleRole = roleList[0];
-                int chance = Math.Max(singleRole.SpawnChance, 1);
-                if (UnityEngine.Random.Range(0, 100) < chance)
-                {
-                    isApplyingRole = true;
-                    CustomRole.GiveRole(player, singleRole);
-                    isApplyingRole = false;
-                }
+            if (!roleList.Any())
                 return;
-            }
-
-            int totalChance = roleList.Sum(r => r.SpawnChance);
-            if (totalChance <= 0) return;
-
-            int roll = UnityEngine.Random.Range(0, totalChance);
-            int current = 0;
 
             foreach (var role in roleList)
             {
-                current += role.SpawnChance;
-                if (roll < current)
+                int chance = Math.Max(role.SpawnChance, 1);
+                if (UnityEngine.Random.Range(0, 100) < chance)
                 {
                     isApplyingRole = true;
                     CustomRole.GiveRole(player, role);

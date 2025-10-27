@@ -14,6 +14,7 @@ namespace UntitledCustomRoles.API.Interfaces
         string CustomInfo { get; set; }
         int SpawnChance { get; set; }
         RoleTypeId RoleType { get; set; }
+        bool IgnoreRole { get; set; }
         float Health { get; set; }
         RoleTypeId RoleAppearance { get; set; }
         Dictionary<EffectType, byte> Effects { get; set; }

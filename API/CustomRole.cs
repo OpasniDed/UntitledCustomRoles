@@ -43,12 +43,10 @@ namespace UntitledCustomRoles.API
             if (player == null || role == null) return false;
 
 
-            player.Role.Set(role.RoleType);
 
             Timing.CallDelayed(0.1f, () =>
             {
                 ApplyRole(player, role);
-                PlayerRoles[player] = role;
             });
 
             return true;
@@ -120,51 +118,45 @@ namespace UntitledCustomRoles.API
         {
             if (spawning.Contains(player)) return;
             spawning.Add(player);
-            player.CustomInfo = role.CustomInfo;
-            player.Health = role.Health;
-            player.MaxHealth = role.Health;
-            player.ClearInventory();
-            player.ClearAmmo();
-            player.Scale = role.Size;
-            
-
-            if (role.RoleAppearance != RoleTypeId.None)
-                player.ChangeAppearance(role.RoleAppearance);
-
-            if (role.Effects.Count > 0)
+            Timing.CallDelayed(0f, () =>
             {
+                if (player.Role.Type != role.RoleType)
+                    player.Role.Set(role.RoleType);
+                player.CustomInfo = role.CustomInfo;
+                player.Health = role.Health;
+                player.MaxHealth = role.Health;
+                player.ClearInventory();
+                player.ClearAmmo();
+                player.Scale = role.Size;
+                PlayerRoles[player] = role;
+
+                if (role.RoleAppearance != RoleTypeId.None)
+                    player.ChangeAppearance(role.RoleAppearance);
+
                 foreach (var effect in role.Effects)
                     player.EnableEffect(effect.Key, effect.Value);
-            }
 
-            if (role.Items.Count > 0)
-            {
                 foreach (ItemType item in role.Items)
                     player.AddItem(item);
-            }
 
-            if (role.CustomItems.Count > 0)
-            {
                 foreach (uint item in role.CustomItems)
                     CustomItem.TryGive(player, item);
-            }
 
-            if (role.Ammo.Count > 0)
-            {
                 foreach (var ammo in role.Ammo)
                     player.AddAmmo(ammo.Key, ammo.Value);
-            }
 
-            if (role.SpawnRoom != RoomType.Unknown)
-                player.Position = GetValidPosition(Room.Get(role.SpawnRoom));
+                if (role.SpawnRoom != RoomType.Unknown)
+                    player.Position = GetValidPosition(Room.Get(role.SpawnRoom));
 
-            player.Broadcast(role.BroadcastDuration, role.BroadcastText);
-            CustomRoleEvents.OnCustomRoleSpawned(new Events.Args.CustomRoleSpawnedEventArgs(player, role));
-            Timing.CallDelayed(0.1f, () =>
-            {
-                if (spawning.Contains(player))
-                    spawning.Remove(player);
+                player.Broadcast(role.BroadcastDuration, role.BroadcastText);
+                CustomRoleEvents.OnCustomRoleSpawned(new Events.Args.CustomRoleSpawnedEventArgs(player, role));
+                Timing.CallDelayed(0.1f, () =>
+                {
+                    if (spawning.Contains(player))
+                        spawning.Remove(player);
+                });
             });
+                 
         }
 
 
